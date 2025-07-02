@@ -1,26 +1,29 @@
-from fastapi import FastAPI, Request, HTTPException
+import streamlit as st
+import time
 import requests
 
-app = FastAPI()
-
-# Configuration
+# 🛠️ Static Config
 WASSENGER_API_KEY = '6a4e3923600906e7d721b0ef7ae085294a9bf14ede5cc1571c422c4740a768b262cf07074469d69a'
 WHATSAPP_GROUP_ID = '120363400582679816@g.us'
 
-@app.get("/")
-def home():
-    return {"message": "✅ WhatsApp Sender API is running!"}
+# 📄 Static document URL and message
+STATIC_DOCUMENT_URL = "https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf"
+STATIC_MESSAGE = """🚨 *Shipment Status Alert*
 
-@app.post("/create-and-send")
-async def create_and_send(request: Request):
-    data = await request.json()
-    document_url = data.get("document_url")
-    message_text = data.get("message")
+Dear Team,
 
-    if not document_url or not message_text:
-        raise HTTPException(status_code=400, detail="document_url and message are required")
+Check the Jobs whose Shipment Handover is pending and awaiting your response."""
 
-    final_message = f"{message_text}\n\n{document_url}"
+# 🌐 Streamlit UI
+st.title("📤 Delay WhatsApp Message (Wassenger)")
+
+delay_seconds = st.number_input("⏱ Enter delay in seconds", min_value=1, max_value=3600, value=10)
+
+if st.button("✅ Start Timer and Send"):
+    st.info(f"Waiting {delay_seconds} seconds before sending message...")
+    time.sleep(delay_seconds)
+
+    final_message = f"{STATIC_MESSAGE}\n\n{STATIC_DOCUMENT_URL}"
 
     response = requests.post(
         f"https://api.wassenger.com/v1/messages?token={WASSENGER_API_KEY}",
@@ -28,10 +31,7 @@ async def create_and_send(request: Request):
         headers={"Content-Type": "application/json"}
     )
 
-    if response.status_code != 200:
-        raise HTTPException(status_code=500, detail=f"Failed to send message: {response.text}")
-
-    return {
-        "message_sent": True,
-        "wassenger_response": response.json()
-    }
+    if response.status_code == 200:
+        st.success("✅ Message sent successfully via Wassenger!")
+    else:
+        st.error(f"❌ Failed to send message: {response.status_code}\n{response.text}")
