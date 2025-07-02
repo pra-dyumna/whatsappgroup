@@ -7,8 +7,8 @@ WHATSAPP_GROUP_ID = '120363400582679816@g.us'
 
 st.title("📤 WhatsApp Document Sender")
 
-document_url = st.text_input("Document URL")
-message_text = st.text_area("Message")
+document_url = st.text_input("https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf")
+message_text = st.text_area("Shipment Status Alert\n\nDear Team,\n\nCheck the Jobs whose Shipment Handover is pending and awaiting your response.")
 
 if st.button("Send to WhatsApp Group"):
     if not document_url or not message_text:
