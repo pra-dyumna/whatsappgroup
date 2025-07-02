@@ -1,28 +1,37 @@
-import streamlit as st
+from fastapi import FastAPI, Request, HTTPException
 import requests
 
-# 🛠️ Config
+app = FastAPI()
+
+# Configuration
 WASSENGER_API_KEY = '6a4e3923600906e7d721b0ef7ae085294a9bf14ede5cc1571c422c4740a768b262cf07074469d69a'
 WHATSAPP_GROUP_ID = '120363400582679816@g.us'
 
-st.title("📤 WhatsApp Document Sender")
+@app.get("/")
+def home():
+    return {"message": "✅ WhatsApp Sender API is running!"}
 
-document_url = st.text_input("https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf")
-message_text = st.text_area("Shipment Status Alert\n\nDear Team,\n\nCheck the Jobs whose Shipment Handover is pending and awaiting your response.")
+@app.post("/create-and-send")
+async def create_and_send(request: Request):
+    data = await request.json()
+    document_url = data.get("document_url")
+    message_text = data.get("message")
 
-if st.button("Send to WhatsApp Group"):
     if not document_url or not message_text:
-        st.error("Please enter both message and document URL.")
-    else:
-        final_message = f"{message_text}\n\n{document_url}"
+        raise HTTPException(status_code=400, detail="document_url and message are required")
 
-        response = requests.post(
-            f"https://api.wassenger.com/v1/messages?token={WASSENGER_API_KEY}",
-            json={"group": WHATSAPP_GROUP_ID, "message": final_message},
-            headers={"Content-Type": "application/json"}
-        )
+    final_message = f"{message_text}\n\n{document_url}"
 
-        if response.status_code == 200:
-            st.success("✅ Message sent successfully!")
-        else:
-            st.error(f"❌ Failed to send message: {response.text}")
+    response = requests.post(
+        f"https://api.wassenger.com/v1/messages?token={WASSENGER_API_KEY}",
+        json={"group": WHATSAPP_GROUP_ID, "message": final_message},
+        headers={"Content-Type": "application/json"}
+    )
+
+    if response.status_code != 200:
+        raise HTTPException(status_code=500, detail=f"Failed to send message: {response.text}")
+
+    return {
+        "message_sent": True,
+        "wassenger_response": response.json()
+    }
