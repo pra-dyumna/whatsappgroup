@@ -1,10 +1,10 @@
 import streamlit as st
 import time
 import requests
-
+import os 
 # 🛠️ Static Config
-WASSENGER_API_KEY = '6a4e3923600906e7d721b0ef7ae085294a9bf14ede5cc1571c422c4740a768b262cf07074469d69a'
-WHATSAPP_GROUP_ID = '120363400582679816@g.us'
+WASSENGER_API_KEY = "WS_key"
+WHATSAPP_GROUP_ID = "group id "
 
 # 📄 Static document URL and message
 STATIC_DOCUMENT_URL = "https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf"
@@ -35,3 +35,4 @@ if st.button("✅ Start Timer and Send"):
         st.success("✅ Message sent successfully via Wassenger!")
     else:
         st.error(f"❌ Failed to send message: {response.status_code}\n{response.text}")
+
